@@ -1,0 +1,16 @@
+# Local virtualenv (rebuilt inside the image)
+.venv/
+
+# Python caches / bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Tests and tool caches (not needed in the runtime image)
+tests/
+.pytest_cache/
+.ruff_cache/
+
+# Misc
+*.egg-info/
+.mypy_cache/
