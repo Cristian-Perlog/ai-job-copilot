@@ -1,7 +1,7 @@
 version: 2
 updates:
-  # Python deps (uv.lock is read via Dependabot's pip ecosystem).
-  - package-ecosystem: "pip"
+  # Python deps (uv.lock is updated via Dependabot's native uv ecosystem).
+  - package-ecosystem: "uv"
     directory: "/backend"
     schedule:
       interval: "weekly"

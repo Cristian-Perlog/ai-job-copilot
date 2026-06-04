@@ -23,7 +23,7 @@ Alembic migration. Run every command from `backend/`.
    uv run alembic revision --autogenerate -m "<imperative summary>"
    ```
 
-   The ruff post-write hooks auto-format the generated file.
+   Alembic's `[post_write_hooks]` in `backend/alembic.ini` (ruff_fix and ruff_format) auto-format the generated file.
 
 3. **Read the generated file** before applying it. Autogenerate is a draft, not
    an answer. Work through the checklist below.
