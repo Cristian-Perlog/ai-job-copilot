@@ -1,0 +1,21 @@
+# Run `uvx pre-commit install` once to enable these on git commit.
+# ruff rev is pinned to match the version locked in backend/uv.lock.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.16
+    hooks:
+      - id: ruff
+        name: ruff (lint, fix)
+        args: ["--fix"]
+        files: ^backend/
+      - id: ruff-format
+        name: ruff (format)
+        files: ^backend/
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
