@@ -2,31 +2,28 @@
 
 ## Summary
 
-**AI Job Application Copilot** is a personal job-search dashboard designed for software engineers.
-It centralizes job application tracking, interview preparation, analytics, and intelligent recommendations into a single platform that acts as a personal job-search operating system.
+**AI Job Application Copilot** is a job-application tracker for early-career software engineers.
 
-The goal is to reduce the chaos of job hunting by replacing spreadsheets, scattered notes, and emails with one clear command center.
+Its one differentiator: **you never type an application.** Paste a job URL or the posting text and it's captured — an LLM extracts the company, role, location, tech stack, and salary into a draft you confirm in one click. Everything else is a focused, well-built tracker around that capture core.
+
+This project has a deliberate dual goal, with both halves treated as equal priority:
+
+1. **A real product** that an early-career engineer would actually use during a job search.
+2. **A production-grade engineering learning project** — backend design, auth, data modeling, CI, observability, and cloud deployment done the way a strong team would do them.
+
+When the two goals conflict, the rule is: **product decisions favor the wedge** (lower-friction capture, a tracker that earns daily use). **Engineering decisions may favor learning value when the cost is small** (e.g. choosing a slightly more involved pattern because it's worth practicing), but never at the expense of the product feeling worse to use.
 
 ---
 
 ## Motivation
 
-Job hunting as a CS student or early-career developer is fragmented and stressful:
+Job hunting as a student or early-career developer is fragmented and tedious:
 
-* Job links are stored in bookmarks or random notes
-* Applications are tracked in spreadsheets
-* Interview notes live in Notion or Google Docs
-* Emails are scattered across inboxes
-* There is no feedback loop or analytics
+* Job links live in bookmarks, tabs, and random notes.
+* Applications get tracked in a spreadsheet — or not at all.
+* The boring part isn't *deciding* to apply; it's the **data entry** of copying company, role, location, stack, and salary out of a posting and into a row.
 
-This makes it difficult to:
-
-* track progress
-* prepare effectively
-* understand what is working
-* stay motivated and organized
-
-This project aims to solve that problem by building a **single source of truth** for the job search process.
+That data-entry tax is exactly why most trackers lose to a spreadsheet: a spreadsheet is already open and asks nothing of you. So the wedge is not "more features." It's **removing the typing**: capture an application from a URL or pasted text in seconds, with no manual entry.
 
 ---
 
@@ -34,166 +31,141 @@ This project aims to solve that problem by building a **single source of truth**
 
 ### Primary users
 
-* Computer Science students nearing graduation
-* Early-career software engineers actively job hunting
-* Developers preparing for internships or full-time roles
+* Computer Science students nearing graduation.
+* Early-career software engineers actively job hunting.
+* Developers applying for internships or first full-time roles.
+
+These users apply to many roles in a short, intense window and feel the data-entry tax acutely.
 
 ### Secondary users (future)
 
-* Career switchers into tech
-* Bootcamp graduates
+* Career switchers into tech.
+* Bootcamp graduates.
+
+---
+
+## Positioning
+
+### The landscape
+
+The space is crowded: **Huntr**, **Teal**, **Simplify**, **Careerflow**, and a long tail of free **Notion / Google Sheets templates**. Most compete on breadth — resume builders, AI cover letters, contact CRMs, Chrome autofill, job boards. The free templates compete on being free and instantly editable.
+
+### The wedge (one sentence)
+
+> The only tracker where you never type an application — paste a URL or the posting text and it's captured.
+
+Competitors treat capture as a checkbox feature behind a browser extension. Here it *is* the product. We win on getting an application into the tracker faster and with less effort than anyone else, then being a clean, trustworthy home for it.
+
+### Why not a spreadsheet?
+
+A spreadsheet is the honest competitor, and it's a strong one: it's already open, it's free, it's infinitely flexible, and it never makes you log in. Most trackers lose to it because they add features the user didn't ask for while still making them type every field.
+
+We don't try to out-feature a spreadsheet — we beat it on **friction**. Pasting a link and confirming a pre-filled draft is less work than tabbing to a sheet and typing five columns. If we are ever *more* work than a spreadsheet for the core loop of "I found a job, save it," we have lost. Every product decision is measured against that bar.
 
 ---
 
 ## Product Vision
 
-The application is built around five pillars:
+The committed vision is deliberately narrow: **frictionless capture + a tracker that does the core job excellently.** Two pillars, done well, beat five pillars done partially.
 
-1. **Application Tracking**
-   Track every job opportunity and its progress.
+1. **AI-first capture**
+   Paste a job URL or posting text; an LLM extracts company, role, location, tech stack, and salary into a *draft* application. The user reviews and confirms — extraction is assistive, never silently authoritative.
 
-2. **Interview Preparation Hub**
-   Organize and prepare for upcoming interviews.
+2. **Application & interview tracking**
+   A clean home for every opportunity: statuses, interviews, notes, and a dashboard that makes the pipeline legible at a glance. Import from an existing spreadsheet, export your data whenever you want.
 
-3. **Job Search Analytics**
-   Provide insights into how effective the job search strategy is.
+Anything outside these two pillars is explicitly **not** in the committed vision and lives under "Future Ideas" below until the core is excellent.
 
-4. **Application Prioritization & Recommendations (Phase 2)**
-   Help users decide which jobs to focus on next using preferences and smart scoring.
+---
 
-5. **AI Job Coach (future phase)**
-   Provide intelligent assistance for applications and interview prep.
+## North-Star Metric
+
+**Median applications captured per active user in week 1.**
+
+This metric only moves if capture is genuinely frictionless — it's resistant to vanity features and directly measures whether the wedge is working. If users aren't capturing applications easily in their first week, nothing else matters.
 
 ---
 
 ## MVP Scope (Phase 1)
 
-The MVP focuses on building a useful daily tool that replaces spreadsheets and notes.
+The MVP is a useful daily tracker that a real job-seeker could adopt — *before* any AI is added. Capture (the wedge) lands in Phase 2; the MVP must stand on its own as the best-feeling manual tracker, with a clean migration path in and out.
 
 ### Authentication
 
-* Sign in with Google OAuth
-* Secure user accounts
+* Sign in with Google (Google ID token exchanged for a backend-minted, httpOnly session).
+* Secure, per-user data isolation.
 
-### Job Application Tracking
+### Job application tracking
 
-Users can:
+Create, edit, and delete applications, each storing:
 
-* Create, edit, and delete job applications
-* Store:
+* company, role, location, job link
+* tech stack / tags
+* salary (if known)
+* notes
+* status
 
-  * company
-  * role
-  * job link
-  * notes
-  * application status
+Statuses: **Wishlist → Applied → Interviewing → Offer → Rejected.** Status changes are recorded as history so the pipeline timeline is real, not a single mutable field.
 
-Application statuses:
+### Interview tracking
 
-* Wishlist
-* Applied
-* Interviewing
-* Offer
-* Rejected
+Add interviews linked to an application, storing date, type (phone / online / onsite), and prep notes.
 
-### Interview Tracker
+### Dashboard (command center)
 
-Users can:
+A pipeline-oriented overview: applications by status, upcoming interviews, and applications awaiting a response.
 
-* Add interviews linked to applications
-* Store:
+**Designed empty state.** A brand-new user must never see a dead "0 / 0 / 0 / 0" dashboard. The first-run experience guides them to capture or import their first application — the empty state is a designed onboarding surface, not an afterthought.
 
-  * interview date
-  * interview type (phone, online, onsite)
-  * notes and preparation details
+### Data portability
 
-### Dashboard (Command Center)
-
-When users open the app, they should immediately see:
-
-**Key metrics**
-
-* Total applications
-* Interviews scheduled
-* Offers received
-* Rejections
-
-**Pipeline overview**
-
-* Application → Interview → Offer funnel
-
-**Upcoming actions**
-
-* Upcoming interviews
-* Applications waiting for response
-
-This dashboard should make the job search clearer and more manageable.
+* **CSV import** — a one-step migration path off an existing spreadsheet. This both lowers adoption friction and exercises a real parsing/validation flow.
+* **CSV / JSON export** — users can take their data out at any time. This is a trust feature: a tracker you can't leave is one you won't commit to.
 
 ---
 
-## Phase 2 Features (Post-MVP)
+## Phase 2 — Capture Wedge (first AI feature)
 
-### Smart Application Prioritization ⭐
+The flagship AI feature, and the first one built:
 
-The system will recommend which applications to focus on next based on user preferences and job attributes.
+### Paste-to-capture
 
-#### User Preferences (examples)
+* The user pastes a **job URL** or **posting text**.
+* An LLM extracts company, role, location, tech stack, and salary.
+* The result is a **draft** application with a required **confirm step** — the user verifies and edits before it's saved. Extraction is fallible; the human stays in the loop.
 
-Users can define preferences such as:
+This replaces manual entry as the primary way applications enter the system and is the single feature most likely to move the north-star metric.
 
-* Preferred countries or remote roles
-* Target salary range
-* Preferred tech stack / languages
-* Visa requirements
-* Company size (startup / scale-up / big tech)
-* Work culture tags (e.g. WLB, fast-paced, research-oriented)
-
-#### Application Scoring
-
-Each application receives a **priority score** based on how well it matches user preferences.
-
-The system will provide:
-
-* A ranked list of recommended applications to apply to next
-* “Recommended next actions” on the dashboard
-* Explainable scoring (e.g. “+20 matches preferred country”, “+15 tech stack match”)
-
-This feature begins as a rules-based recommendation engine and can evolve into a learning-based model later.
+Operational guardrails ship **with** this first AI endpoint, not later: per-user rate limits and quotas, plus an audit trail of generations (cost and usage are real concerns from the first AI call).
 
 ---
 
-### AI Job Coach
+## Pricing & Retention (open question, honest default)
 
-* Generate cover letters from job descriptions
-* Suggest interview questions based on role/company
-* Provide application improvement suggestions
+Job search is **episodic**. A user's search lasts weeks to a few months, and the best outcome — they get hired — means they *stop needing the product*. **Users churn on success, by design.** That breaks the assumptions behind a perpetual monthly subscription.
 
----
+The honest default, recorded as the working position until evidence says otherwise:
 
-### Background Automation
+> Price around the **active-search period** (e.g. a time-boxed plan covering an active search) rather than an open-ended subscription that quietly bills people who already got the job.
 
-* Email parsing (Gmail integration)
-* Weekly analytics summary
-* Smart reminders
+This is an **open question**, not a settled decision — but the default direction is "don't pretend job search is forever."
 
 ---
 
-### Integrations
+## Future Ideas (explicitly not committed)
 
-* LeetCode progress tracking
-* Calendar integration for interviews
+These are noted so they aren't reinvented later. None are part of the committed vision; the bar for promoting any of them is "the capture + tracking core is already excellent."
+
+* **Prioritization / scoring of jobs.** Only valuable if applied to *inbound or un-curated* jobs (e.g. a recommendation feed). Scoring jobs the user *already chose to save* just restates their own inputs and adds no information — so this is out unless there's an un-curated job stream to score.
+* **Interview Prep Hub** — structured, AI-assisted interview preparation.
+* **AI Job Coach** — cover-letter generation, tailored interview questions, application feedback.
+* **Integrations** — LeetCode progress, calendar sync for interviews.
+* **Email/inbox parsing (deferred indefinitely).** Auto-capturing applications from Gmail is tempting, but the restricted Gmail OAuth scopes it requires trigger Google's CASA security-audit process — a recurring, expensive compliance burden that is impractical for a solo developer. URL/text paste delivers most of the value and sidesteps that wall entirely. This constraint is, in effect, part of the moat: the friction that blocks a solo dev from inbox parsing is the same friction that pushed us to a better, audit-free capture model.
 
 ---
 
 ## Long-Term Vision
 
-This project is designed as a full-stack, production-style SaaS application to practice:
+Build a realistic, end-to-end SaaS that is genuinely good at one thing — getting job applications captured and tracked with the least possible friction — while serving as a portfolio-grade demonstration of production engineering: API design, data modeling, authentication and security, testing, CI/CD, observability, infrastructure-as-code, and a documented cloud deployment.
 
-* Backend API design
-* Frontend development
-* Database modeling
-* Authentication and security
-* Background job processing
-* Cloud deployment (AWS ECS + RDS)
-
-The goal is to build a realistic, end-to-end product while improving software engineering skills and gaining experience with production-style system design.
+The measure of success is both halves of the dual goal: a product an early-career engineer would actually keep open during a job hunt, and a codebase a strong engineering team would respect.

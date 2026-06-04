@@ -1,126 +1,105 @@
 # Roadmap
 
-This roadmap is designed to ship a usable product quickly (Phase 1) and then layer in “production + wow” features (Phase 2+).
+Ship a usable product quickly (Phase 1), then layer in the capture wedge and production depth. The MVP must be the best-feeling manual tracker *before* any AI is added; the wedge (paste-to-capture) is the first AI feature in Phase 2.
 
 ---
 
 ## Phase 0 — Repo setup (done)
-- Create repository structure (`frontend/`, `backend/`, `docs/`, `infrastructure/`)
-- Draft `product.md`, `architecture.md`, `roadmap.md`
+- Repository created with `backend/` and `docs/`. (`frontend/` and `infrastructure/` are added when their phases begin, not up front.)
+- Backend scaffolded: FastAPI app, health endpoint, PostgreSQL via SQLAlchemy, Alembic migrations configured.
+- Drafted `product.md`, `architecture.md`, `roadmap.md`.
 
 ---
 
-## Phase 1 — MVP (usable daily tool)
+## Phase 0.5 — Foundations (in progress)
 
-### 1. Backend foundation
-- FastAPI project setup
-- PostgreSQL integration (SQLAlchemy)
-- Alembic migrations
-- Core models: users, job_applications, interviews
-- CRUD endpoints for applications + interviews
-- Basic analytics endpoint(s) for dashboard metrics
-- Basic tests (pytest)
-- API documentation via OpenAPI
+Production-grade baseline, on the `foundations` branch. This is the engineering-learning half of the dual goal paying off early — CI and observability live here, not bolted on at the end.
 
-Deliverable:
-- Working API + DB schema locally via Docker
+- Docs revision: `product.md` + `roadmap.md` aligned to the capture wedge and the narrowed vision.
+- `uv` for dependency management and reproducible installs.
+- Config / environment handling cleaned up (typed settings, no secrets in code).
+- Structured **JSON logging**, **request-ID** propagation, a consistent **error-envelope** response shape, and a **health live/ready split** (liveness vs. readiness).
+- Test scaffold (pytest) wired and runnable.
+- **Dockerfile** + hardened **docker-compose** for local dev.
+- `CLAUDE.md` and Claude Code project tooling.
+- **pre-commit** hooks, **GitHub Actions CI** (lint + tests + build), **Dependabot**.
 
-### 2. Frontend foundation
-- Next.js + TypeScript setup
-- Auth UI (Google OAuth)
-- Pages:
-  - Dashboard (basic metrics)
-  - Applications list + create/edit
-  - Application detail view
-  - Interviews view
-- API integration (fetch layer, error states)
+Deliverable: a clean, observable, CI-backed baseline to build features on.
 
-Deliverable:
-- MVP UI fully functional against local API
+---
+
+## Phase 1 — MVP (usable daily tracker, no AI yet)
+
+### 1. Backend
+- Models + migrations: `users`, `job_applications`, `interviews`, `application_status_history`.
+- Auth: Google ID token verified by the backend, exchanged for a **backend-minted httpOnly session** (see `docs/adr/0001`).
+- CRUD + dashboard endpoints, with **pagination** and strict **per-user scoping** on every query.
+- **CSV import** (spreadsheet migration path) and **CSV / JSON export** (data-portability / trust).
+- Tests for the critical flows.
+
+Deliverable: working API + schema locally, fully per-user isolated.
+
+> No Celery / Redis in the MVP. Nothing here needs a queue.
+
+### 2. Frontend (Next.js + TypeScript)
+- Auth UI (Google sign-in → backend session).
+- Pages: dashboard, applications list, application create/edit/detail, interviews.
+- **Designed empty states** — a new user is onboarded toward capture/import, never shown a dead all-zeros dashboard.
+- Fetch layer with real loading / error states.
+
+Deliverable: MVP UI fully functional against the local API.
 
 ### 3. Local production experience
-- Dockerize frontend + backend + worker
-- Docker Compose one-command startup
-- GitHub Actions CI (lint + tests + build)
+- `docker compose up` brings up frontend + backend + Postgres.
 
-Deliverable:
-- `docker compose up` runs the entire system locally
+Deliverable: the whole MVP runs locally with one command. (CI and observability already exist from Phase 0.5.)
 
 ---
 
-## Phase 2 — “Flagship” features (differentiators)
+## Phase 2 — Capture wedge + first AI feature
 
-### 4. Background jobs (Redis + Celery)
-- Add worker service + Redis broker
-- Use async jobs for:
-  - analytics snapshot generation
-  - AI tasks (later)
-- Add a simple job status table if needed
+### 4. Paste-to-capture (the flagship)
+- Endpoint: paste a **job URL** or **posting text** → LLM extracts company, role, location, tech stack, salary.
+- Returns a **draft** application with a required **confirm step** before save (human in the loop).
+- Ship operational guardrails **with this first AI endpoint**: per-user **rate limiting + quotas**, and an **`ai_generations` audit table** (track cost/usage from the first call).
 
-Deliverable:
-- At least one background task running reliably
+Deliverable: capture an application from a link or pasted text in seconds — the single feature most likely to move the north-star metric.
 
-### 5. Smart application prioritization
-- Add user preference settings (country, salary target, stack, etc.)
-- Implement rules-based scoring:
-  - output: priority score + reasons (“explainability”)
-- Add a “Recommended Next Actions” panel on dashboard
-
-Deliverable:
-- Users can see ranked applications and understand why
-
-### 6. AI Job Coach (scoped)
-Pick ONE AI feature first:
-- Cover letter generator from job description + resume bullets
-OR
-- Interview question generator based on role/company
-
-Deliverable:
-- One AI-powered feature integrated end-to-end, invoked via background jobs
+### 5. Async only if needed
+- Start with FastAPI **BackgroundTasks** for any deferred work.
+- Introduce a real queue (Redis/Celery) **only if** a genuine async need emerges (e.g. slow batch extraction). Don't add the queue speculatively.
 
 ---
 
-## Phase 3 — Production deployment (AWS)
+## Phase 3 — Cloud deployment (hybrid: learn it, then run cheap)
 
-### 7. AWS deployment
-- Container images in ECR
-- ECS Fargate services:
-  - frontend
-  - backend
-  - worker
-- RDS Postgres
-- ElastiCache Redis
-- Secrets in SSM/Secrets Manager
-- CloudWatch logs + health checks
-- Domain + HTTPS (optional)
+Deployment serves both goals without burning money on an idle cloud bill.
 
-Deliverable:
-- Public URL with production deployment
+### 6. Infrastructure-as-code, one documented deploy
+- **Terraform** IaC under `infrastructure/`.
+- Stand up **AWS Budgets** alarms at **$10 / $25 / $50 BEFORE any `apply`**.
+- Do ONE full, documented AWS deploy as a learning exercise, then **`terraform destroy`**.
+- Record the cost reasoning: an always-on **ECS + RDS + ElastiCache + ALB + NAT** stack runs roughly **$130–190/month idle**, which is not justifiable for a portfolio demo.
+
+### 7. Cheap day-to-day hosting
+- Run the live demo on low-cost PaaS: e.g. **Vercel** (frontend) + **Fly.io / Railway** (backend) + **Neon** (Postgres).
+
+Deliverable: a public demo URL on a near-zero idle cost, plus a real, documented IaC deploy proving the AWS skill.
 
 ---
 
 ## Phase 4 — Polish (hireability multiplier)
+- Deeper integration tests for critical flows.
+- Seed / demo data.
+- Architecture + deployment diagrams.
+- Short demo video / GIFs in the README.
 
-### 8. Quality improvements
-- More tests (integration tests for critical flows)
-- Rate limiting / basic abuse protection
-- Better error handling + logging
-- Observability (Sentry or OpenTelemetry optional)
-- Performance improvements (indexes, caching if needed)
-
-### 9. Documentation & demo
-- Architecture diagram(s)
-- Deployment diagram(s)
-- Seed demo data
-- Short demo video/GIFs in README
-
-Deliverable:
-- “Interview-ready” repo: easy to understand, easy to demo, clearly engineered
+Deliverable: an "interview-ready" repo — easy to understand, easy to demo, clearly engineered.
 
 ---
 
-## Stretch goals
-- Gmail parsing ingestion
-- Calendar integration
-- LeetCode integration
-- Learning-based recommendations (train weights from outcomes)
+## Stretch / future ideas
+- **LeetCode** progress integration.
+- **Calendar** integration for interviews.
+- **Gmail / inbox parsing** — deferred indefinitely: the restricted Gmail OAuth scopes trigger Google's CASA security audit, an impractical compliance burden for a solo dev. URL/text paste already covers most of the value.
+- **Prioritization / scoring** — only if an inbound, un-curated job stream is ever introduced (scoring the user's own picks just restates their inputs).
