@@ -14,3 +14,7 @@ tests/
 # Misc
 *.egg-info/
 .mypy_cache/
+
+# Never bake env files into the image
+.env
+.env.*
