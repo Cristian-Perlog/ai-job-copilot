@@ -1,7 +1,15 @@
 name: CI
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
+    branches: [main, foundations]
   pull_request:
   workflow_dispatch:
 

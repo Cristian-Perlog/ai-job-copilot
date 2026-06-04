@@ -47,6 +47,7 @@ Run from `backend/` unless noted. `.env` lives at the **repo root**; copy it fro
 
 ## Conventions
 
+- **Permission allowlist:** run plain commands like `uv run ...` without env-var prefixes (e.g. no `X=1 uv run ...`), or Claude Code will prompt for permission.
 - All route handlers are sync `def`, never `async def` (ADR-0002).
 - Every owned-resource query goes through a scoped-query helper requiring
   `current_user_id`; cross-user access returns 404 (ADR-0003). Ownership tests
