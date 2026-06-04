@@ -82,7 +82,7 @@ Anything outside these two pillars is explicitly **not** in the committed vision
 
 **Median applications captured per active user in week 1.**
 
-This metric only moves if capture is genuinely frictionless — it's resistant to vanity features and directly measures whether the wedge is working. If users aren't capturing applications easily in their first week, nothing else matters.
+This metric only moves if capture is genuinely frictionless — it's resistant to vanity features and directly measures whether the wedge is working. If users aren't capturing applications easily in their first week, nothing else matters. In the MVP phase, before capture (Phase 2) is implemented and the product is deployed, the same metric is measured over manual application creation and CSV imports.
 
 ---
 
@@ -115,7 +115,7 @@ Add interviews linked to an application, storing date, type (phone / online / on
 
 A pipeline-oriented overview: applications by status, upcoming interviews, and applications awaiting a response.
 
-**Designed empty state.** A brand-new user must never see a dead "0 / 0 / 0 / 0" dashboard. The first-run experience guides them to capture or import their first application — the empty state is a designed onboarding surface, not an afterthought.
+**Designed empty state.** A brand-new user must never see a dead "0 / 0 / 0 / 0" dashboard. The first-run experience guides them to create or import their first application — the empty state is a designed onboarding surface, not an afterthought.
 
 ### Data portability
 
@@ -160,7 +160,7 @@ These are noted so they aren't reinvented later. None are part of the committed 
 * **Interview Prep Hub** — structured, AI-assisted interview preparation.
 * **AI Job Coach** — cover-letter generation, tailored interview questions, application feedback.
 * **Integrations** — LeetCode progress, calendar sync for interviews.
-* **Email/inbox parsing (deferred indefinitely).** Auto-capturing applications from Gmail is tempting, but the restricted Gmail OAuth scopes it requires trigger Google's CASA security-audit process — a recurring, expensive compliance burden that is impractical for a solo developer. URL/text paste delivers most of the value and sidesteps that wall entirely. This constraint is, in effect, part of the moat: the friction that blocks a solo dev from inbox parsing is the same friction that pushed us to a better, audit-free capture model.
+* **Email/inbox parsing (deferred indefinitely).** Auto-capturing applications from Gmail is tempting, but the restricted Gmail OAuth scopes it requires trigger Google's CASA security-audit process — a recurring, expensive compliance burden that is impractical for a solo developer. URL/text paste delivers most of the value and sidesteps that wall entirely.
 
 ---
 

@@ -44,7 +44,7 @@ Deliverable: working API + schema locally, fully per-user isolated.
 ### 2. Frontend (Next.js + TypeScript)
 - Auth UI (Google sign-in → backend session).
 - Pages: dashboard, applications list, application create/edit/detail, interviews.
-- **Designed empty states** — a new user is onboarded toward capture/import, never shown a dead all-zeros dashboard.
+- **Designed empty states** — a new user is onboarded toward create/import, never shown a dead all-zeros dashboard.
 - Fetch layer with real loading / error states.
 
 Deliverable: MVP UI fully functional against the local API.
