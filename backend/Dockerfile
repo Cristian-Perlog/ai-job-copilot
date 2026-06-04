@@ -20,7 +20,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY . .
 
 # ---- Runtime stage -------------------------------------------------------
-FROM python:3.13-slim-bookworm AS runtime
+FROM python:3.14-slim-bookworm AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
