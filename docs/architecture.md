@@ -35,8 +35,7 @@ capture (paste a URL or posting text → an LLM drafts the application). See
 - Phase 3: one documented AWS IaC deploy, then cheap PaaS hosting for the live demo.
 
 There is **no message queue, worker, or Redis** in the system, and none is
-planned for the MVP. (See *Background processing* below — this corrects an earlier
-draft of this document that described services which were never built.)
+planned for the MVP. (See *Background processing* below.)
 
 ---
 
@@ -89,6 +88,10 @@ There is no Celery, no Redis, no worker. Nothing in the MVP needs a queue.
   `{"error": {"code": str, "message": str, "request_id": str}}`. Internal details
   are never leaked; unhandled exceptions become a generic `internal_error` 500.
   **Implemented** (`app/core/errors.py`).
+
+  > **Invariant: error envelope.** Every error response is
+  > `{"error": {"code": str, "message": str, "request_id": str}}` — internal
+  > details are never leaked.
 - **Request-ID** — middleware reads `X-Request-ID` or generates a uuid4, threads
   it through logs, and echoes it on the response header. **Implemented**
   (`app/core/middleware.py`).
@@ -109,12 +112,20 @@ There is no Celery, no Redis, no worker. Nothing in the MVP needs a queue.
   rationale and the rejected NextAuth-owned-session alternative are in
   [ADR-0001](./adr/0001-auth-backend-minted-session.md). **Planned (Phase 1)**;
   the CORS pieces it depends on (explicit origin + credentials) are Implemented.
+  In production the API is kept **same-site** by proxying it through the
+  frontend's domain via Next.js rewrites (so `SameSite=Lax` keeps working and
+  CORS is off the production path); see ADR-0001 for the topology and the
+  `SameSite=None` fallback.
 - **Per-user scoping** — the #1 vulnerability class for this app shape is IDOR.
   Every query touching an owned resource goes through a scoped-query helper that
   *requires* `current_user_id` and filters at the SQL level; cross-user access
   returns **404, not 403** (no existence leak). Ownership tests are required for
   every owned-resource endpoint. See
   [ADR-0003](./adr/0003-layering-scoped-queries.md). **Planned (Phase 1).**
+
+  > **Invariant: per-user scoping.** Every query touching an owned resource goes
+  > through a scoped-query helper that requires `current_user_id` and filters at
+  > the SQL level; cross-user access returns **404, not 403**.
 
 ---
 
@@ -127,14 +138,29 @@ These are settled now so the Phase 1 schema lands consistent.
 - **Naming convention** — a SQLAlchemy `naming_convention` is set on the
   declarative `Base` so Alembic autogenerate produces stable constraint/index
   names. **Implemented** (`app/core/db.py`).
-- **Application status state machine** — `wishlist → applied → interviewing →
-  offer | rejected`, with explicit allowed transitions enforced in the service
-  layer. Every transition writes an `application_status_history` row, so the
-  pipeline timeline is real data, not a single mutable field. **Planned (Phase 1).**
+- **Application status state machine** — the **canonical** allowed-transitions
+  table lives here (product.md references it, does not redraw it). Transitions are
+  enforced in the service layer. **Planned (Phase 1).**
+
+  | from | allowed → to | notes |
+  | --- | --- | --- |
+  | `wishlist` | `applied`, `rejected` | `rejected` = abandoned before applying |
+  | `applied` | `interviewing`, `offer`, `rejected` | `offer` = rare direct offer; `rejected` incl. ghosted / auto-reject — the most common real transition |
+  | `interviewing` | `offer`, `rejected` | |
+  | `offer` | `rejected` | declined or rescinded |
+  | `rejected` | `applied`, `interviewing` | re-engagement; terminal states are re-openable by explicit transition |
+
+  Every transition writes an `application_status_history` row (`old_status`,
+  `new_status`, `occurred_at`, optional `note`), so the pipeline timeline is real
+  data, not a single mutable field. Invalid transitions return **422** with the
+  standard error envelope.
 - **Deletes** — **hard delete**, no soft-delete flag. FK `ON DELETE CASCADE` from
   every user-owned table means deleting a user erases their data (right-to-erasure
   designed in). Status history captures the pipeline trail; we do not also keep
-  tombstoned rows. **Planned (Phase 1).**
+  tombstoned rows. Note the deliberate trade: account erasure via CASCADE
+  necessarily deletes that user's `application_status_history` **and**
+  `ai_generations` rows — the audit trail is **per-user-erasable by design**, and
+  that is the intended behavior, not a gap. **Planned (Phase 1).**
 
 ---
 

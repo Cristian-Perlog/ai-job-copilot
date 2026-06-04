@@ -82,7 +82,7 @@ Anything outside these two pillars is explicitly **not** in the committed vision
 
 **Median applications captured per active user in week 1.**
 
-This metric only moves if capture is genuinely frictionless — it's resistant to vanity features and directly measures whether the wedge is working. If users aren't capturing applications easily in their first week, nothing else matters. In the MVP phase, before capture (Phase 2) is implemented and the product is deployed, the same metric is measured over manual application creation and CSV imports.
+This metric only moves if capture is genuinely frictionless — it's resistant to vanity features and directly measures whether the wedge is working. If users aren't capturing applications easily in their first week, nothing else matters. In the MVP phase, before capture (Phase 2) is implemented and the product is deployed, the same metric is measured over manual application creation and CSV imports. This manual + CSV proxy is a **weaker signal** than the true capture metric — it tracks whether people will track applications at all, not whether the friction-removing wedge works — so it is an interim stand-in, not an equivalent.
 
 ---
 
@@ -105,7 +105,7 @@ Create, edit, and delete applications, each storing:
 * notes
 * status
 
-Statuses: **Wishlist → Applied → Interviewing → Offer → Rejected.** Status changes are recorded as history so the pipeline timeline is real, not a single mutable field.
+Statuses: **Wishlist, Applied, Interviewing, Offer, Rejected.** Status changes are recorded as history so the pipeline timeline is real, not a single mutable field. The allowed transitions between statuses are defined in [docs/architecture.md](./architecture.md).
 
 ### Interview tracking
 

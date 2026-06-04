@@ -84,6 +84,10 @@ territory. Rules:
   ranges BEFORE connecting** (e.g. `127.0.0.0/8`, `10/8`, `172.16/12`,
   `192.168/16`, `169.254.0.0/16` including `169.254.169.254`, IPv6 equivalents).
 - **No following redirects into private ranges** — re-validate every hop.
+- **Pin the connection to the validated IP** (or re-validate at connect time);
+  never let the HTTP client re-resolve the hostname after validation. This closes
+  the DNS-rebinding / TOCTOU gap where a name validated as public re-resolves to a
+  private address between the check and the connect.
 - Enforce **timeouts**, a **response size cap**, and a **content-type allowlist**
   (HTML/text only).
 
